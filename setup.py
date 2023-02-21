@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name="myplotlib",
-    packages=setuptools.find_packages(),
-    version="1.0.0",
+    py_modules=["myplotlib"],
+    version="1.0.1",
     install_requires=["matplotlib"],
 )
