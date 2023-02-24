@@ -29,6 +29,20 @@ def setup(
     latex_preamble: str = _preamble,
     default_file_format: str = _default_file_format,
 ):
+    """Setup matplotlib to be consistent with your .tex document.
+
+    Args:
+        width_pt (float, optional): The page width in .tex document. Defaults to _default_width_pt.
+        use_tex (bool, optional): Whether or not to use latex to render text. Defaults to True.
+        font_family (str, optional): The font used in your .tex document. Defaults to "serif".
+        major_fontsize (int, optional): The font size used in your .tex document. Defaults to 10.
+        minor_fontsize (int, optional): A slighlty smaller font size than the fontsize of your .tex document. Defaults to 8.
+        light_grid (bool, optional): Prettier grid lines. Defaults to True.
+        thin_lines (bool, optional): Thinner axes lines. Defaults to False.
+        use_latex_preamble (bool, optional): Whether or not to include a latex preamble when rendering labels. Defaults to True.
+        latex_preamble (str, optional): The latex preamble to include when rendering labels. Defaults to _preamble.
+        default_file_format (str, optional): Default file format used by `savefig` when not explicitly given in filename. Defaults to _default_file_format.
+    """
     _file_format = default_file_format
     _width_pt = width_pt
 
@@ -99,6 +113,14 @@ def figsize(
 
 
 def savefig(filename: str, transparent=True, dpi=300, tight=True):
+    """Saves the current matplotlib figure.
+
+    Args:
+        filename (str): Name of the file
+        transparent (bool, optional): Make background transparent. Defaults to True.
+        dpi (int, optional): DPI of non-vectorized graphics. Defaults to 300.
+        tight (bool, optional): Enables tight figure padding. Defaults to True.
+    """
     kwargs = dict()
     split = filename.split(".")
     if len(split) == 2:
