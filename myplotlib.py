@@ -1,63 +1,11 @@
 import matplotlib
 import matplotlib.pyplot as plt
 
+_default_width_pt = 426.79135
+_default_file_format = "pdf"
 
-def set_size(width, fraction=1, subplots=(1, 1)):
-    """Set figure dimensions to avoid scaling in LaTeX.
-
-    Parameters
-    ----------
-    width: float or string
-            Document width in points, or string of predined document type
-    fraction: float, optional
-            Fraction of the width which you wish the figure to occupy
-    subplots: array-like, optional
-            The number of rows and columns of subplots.
-    Returns
-    -------
-    fig_dim: tuple
-            Dimensions of figure in inches
-    """
-    if width == "thesis":
-        width_pt = 426.79135
-    elif width == "beamer":
-        width_pt = 307.28987
-    else:
-        width_pt = width
-
-    # Width of figure (in pts)
-    fig_width_pt = width_pt * fraction
-    # Convert from pt to inches
-    inches_per_pt = 1 / 72.27
-
-    # Golden ratio to set aesthetic figure height
-    # https://disq.us/p/2940ij3
-    golden_ratio = (5**0.5 - 1) / 2
-
-    # Figure width in inches
-    fig_width_in = fig_width_pt * inches_per_pt
-    # Figure height in inches
-    fig_height_in = fig_width_in * golden_ratio * (subplots[0] / subplots[1])
-
-    return (fig_width_in, fig_height_in)
-
-
-def set_size_dl(width, height=None, ratio=None, texWidth=None):
-    _texWidth = 443.863
-    if texWidth:
-        textwidth_pt = texWidth  # get this from LaTeX using \the\textwidth
-    else:
-        textwidth_pt = _texWidth
-    inches_per_pt = 1.0 / 72.27  # convert pt to inch
-    fig_width = textwidth_pt * inches_per_pt * width  # width in inches
-    if height is None:
-        if ratio is None:
-            ratio = 2.0 / (5.0**0.5 - 1.0)  # golden mean
-        fig_height = fig_width / ratio  # height in inches
-    else:
-        fig_height = textwidth_pt * inches_per_pt * height
-    return fig_width, fig_height
-
+_width_pt = _default_width_pt
+_file_format = _default_file_format
 
 _preamble = r"""
 \usepackage[T1]{fontenc}
@@ -69,40 +17,118 @@ _preamble = r"""
 """
 
 
-def use_pgf():
-    matplotlib.use("pgf")
-    matplotlib.rcParams.update(
-        {
-            "pgf.preamble": _preamble,
-            "pgf.texsystem": "pdflatex",
-        }
-    )
+def setup(
+    width_pt: float = _default_width_pt,
+    use_tex: bool = True,
+    font_family: str = "serif",
+    major_fontsize: int = 10,
+    minor_fontsize: int = 8,
+    light_grid: bool = True,
+    thin_lines: bool = False,
+    use_latex_preamble: bool = True,
+    latex_preamble: str = _preamble,
+    default_file_format: str = _default_file_format,
+):
+    _file_format = default_file_format
+    _width_pt = width_pt
 
-
-def use_tex_fonts(usetex: bool = True):
     matplotlib.rcParams.update(
         {
             # Use LaTeX to write all text
-            "text.usetex": usetex,
-            "font.family": "serif",
+            "text.usetex": use_tex,
+            "font.family": font_family,
             "font.serif": [],  # use default fonts
             "font.sans-serif": [],  # use default fonts
             "font.monospace": [],  # use default fonts
             # Use 10pt font in plots, to match 10pt font in document
-            "axes.labelsize": 10,
-            "axes.titlesize": 10,
-            "font.size": 10,
+            "axes.labelsize": major_fontsize,
+            "axes.titlesize": major_fontsize,
+            "font.size": major_fontsize,
             # Make the legend/label fonts a little smaller
-            "legend.fontsize": 8,
-            "xtick.labelsize": 8,
-            "ytick.labelsize": 8,
+            "legend.fontsize": minor_fontsize,
+            "xtick.labelsize": minor_fontsize,
+            "ytick.labelsize": minor_fontsize,
             # Use system fonts when rendering SVGs.
             "svg.fonttype": "none",
         }
     )
 
+    if thin_lines:
+        _use_thin_lines()
 
-def use_thin_lines():
+    if light_grid:
+        _use_lighter_grid()
+
+    if not use_tex:
+        use_latex_preamble = False
+
+    if use_latex_preamble:
+        _use_pgf(latex_preamble)
+
+
+golden_ratio = 2.0 / (5**0.5 - 1)
+inches_per_pt = 1 / 72.27
+
+
+def figsize(
+    fraction: float = 1.0,
+    ratio: float = golden_ratio,
+    subplots=(1, 1),
+):
+    """Set figure dimensions to avoid scaling in LaTeX.
+
+    fraction: float, optional
+            Fraction of the latex page width which you wish the figure to occupy
+    ratio: float, optional
+            The ratio of width / height of each subplot of the figure
+    subplots: array-like, optional
+            The number of rows and columns of subplots.
+    Returns
+    -------
+    fig_dim: tuple
+            Dimensions of figure in inches
+    """
+
+    # Figure width in inches
+    fig_width_in = _width_pt * inches_per_pt * fraction
+    # Figure height in inches
+    n_rows, n_cols = subplots
+    fig_height_in = fig_width_in * n_rows / (ratio * n_cols)
+
+    return fig_width_in, fig_height_in
+
+
+def savefig(filename: str, transparent=True, dpi=300, tight=True):
+    kwargs = dict()
+    split = filename.split(".")
+    if len(split) == 2:
+        filename, format = split
+    elif len(split) == 1:
+        format = _file_format
+    else:
+        raise Exception(
+            f"The fileformat could not be uniquely inferred from the filename={filename}"
+        )
+
+    if format in ["jpg", "png"]:
+        kwargs.update(dict(dpi=dpi))
+    if tight:
+        kwargs.update(dict(bbox_inches="tight"))
+
+    plt.savefig(filename + format, format=format, transparent=transparent, **kwargs)
+
+
+def _use_pgf(latex_preamble=_preamble):
+    matplotlib.use("pgf")
+    matplotlib.rcParams.update(
+        {
+            "pgf.preamble": latex_preamble,
+            "pgf.texsystem": "pdflatex",
+        }
+    )
+
+
+def _use_thin_lines():
     matplotlib.rcParams.update(
         {
             # Decrease lineweidths to match thinner TeX lettering.
@@ -112,13 +138,7 @@ def use_thin_lines():
     )
 
 
-def use_style_and_tex_fonts(usetex: bool = True, use_light_grid: bool = True):
-    use_tex_fonts(usetex)
-    if use_light_grid:
-        use_lighter_grid()
-
-
-def use_lighter_grid():
+def _use_lighter_grid():
     matplotlib.rcParams.update(
         {
             # corresponds to default b0b0b0 with grid.alpha=0.3,
@@ -126,14 +146,3 @@ def use_lighter_grid():
             "grid.color": "e7e7e7",
         }
     )
-
-
-def savefig(filename: str, transparent=True, dpi=300, tight=True):
-    kwargs = dict()
-    format = filename.split(".")[-1]
-    if format in ["jpg", "png"]:
-        kwargs.update(dict(dpi=dpi))
-    if tight:
-        kwargs.update(dict(bbox_inches="tight"))
-
-    plt.savefig(filename, format=format, transparent=transparent, **kwargs)
