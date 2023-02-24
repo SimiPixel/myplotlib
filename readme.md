@@ -1,6 +1,12 @@
 # myplotlib
 
-Make matplotlib consistent with latex. Details see https://jwalton.info/Embed-Publication-Matplotlib-Latex/.
+Make matplotlib consistent with latex. 
+
+Install with 
+
+`pip install git+https://github.com/SimiPixel/myplotlib`
+
+Implements (mostly) what is described there https://jwalton.info/Embed-Publication-Matplotlib-Latex/.
 
 ## Getting started
 
