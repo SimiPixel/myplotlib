@@ -39,7 +39,9 @@ def setup(
         minor_fontsize (int, optional): A slighlty smaller font size than the fontsize of your .tex document. Defaults to 8.
         light_grid (bool, optional): Prettier grid lines. Defaults to True.
         thin_lines (bool, optional): Thinner axes lines. Defaults to False.
-        use_latex_preamble (bool, optional): Whether or not to include a latex preamble when rendering labels. Defaults to True.
+        use_latex_preamble (bool, optional): Whether or not to include a latex preamble when rendering labels.
+                                             Note that the preamble will overwrite the `font_familty` parameter.
+                                             Defaults to False.
         latex_preamble (str, optional): The latex preamble to include when rendering labels. Defaults to _preamble.
         default_file_format (str, optional): Default file format used by `savefig` when not explicitly given in filename. Defaults to _default_file_format.
     """
@@ -51,9 +53,9 @@ def setup(
             # Use LaTeX to write all text
             "text.usetex": use_tex,
             "font.family": font_family,
-            "font.serif": [],  # use default fonts
-            "font.sans-serif": [],  # use default fonts
-            "font.monospace": [],  # use default fonts
+            # "font.serif": [],  # use default fonts
+            # "font.sans-serif": [],  # use default fonts
+            # "font.monospace": [],  # use default fonts
             # Use 10pt font in plots, to match 10pt font in document
             "axes.labelsize": major_fontsize,
             "axes.titlesize": major_fontsize,
@@ -137,7 +139,9 @@ def savefig(filename: str, transparent=True, dpi=300, tight=True):
     if tight:
         kwargs.update(dict(bbox_inches="tight"))
 
-    plt.savefig(filename + format, format=format, transparent=transparent, **kwargs)
+    plt.savefig(
+        filename + "." + format, format=format, transparent=transparent, **kwargs
+    )
 
 
 def _use_pgf(latex_preamble=_preamble):
