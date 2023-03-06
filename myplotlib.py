@@ -32,19 +32,29 @@ def setup(
     """Setup matplotlib to be consistent with your .tex document.
 
     Args:
-        width_pt (float, optional): The page width in .tex document. Defaults to _default_width_pt.
-        use_tex (bool, optional): Whether or not to use latex to render text. Defaults to True.
-        font_family (str, optional): The font used in your .tex document. Defaults to "serif".
-        major_fontsize (int, optional): The font size used in your .tex document. Defaults to 10.
-        minor_fontsize (int, optional): A slighlty smaller font size than the fontsize of your .tex document. Defaults to 8.
+        width_pt (float, optional): The page width in .tex document.
+            Defaults to _default_width_pt.
+        use_tex (bool, optional): Whether or not to use latex to render text.
+            Defaults to True.
+        font_family (str, optional): The font used in your .tex document.
+            Defaults to "serif".
+        major_fontsize (int, optional): The font size used in your
+            .tex document. Defaults to 10.
+        minor_fontsize (int, optional): A slighlty smaller font size than the
+            fontsize of your .tex document. Defaults to 8.
         light_grid (bool, optional): Prettier grid lines. Defaults to True.
-        thin_lines (bool, optional): Thinner axes lines. Defaults to False.
-        use_latex_preamble (bool, optional): Whether or not to include a latex preamble when rendering labels.
-                                             Note that the preamble will overwrite the `font_familty` parameter.
-                                             Defaults to False.
-        latex_preamble (str, optional): The latex preamble to include when rendering labels. Defaults to _preamble.
-        default_file_format (str, optional): Default file format used by `savefig` when not explicitly given in filename. Defaults to _default_file_format.
+        thin_lines (bool, optional): Thinner axes lines.
+            Defaults to False.
+        use_latex_preamble (bool, optional): Whether or not to include a
+            latex preamble when rendering labels. Note that the preamble
+            will overwrite the `font_familty` parameter. Defaults to False.
+        latex_preamble (str, optional): The latex preamble to include
+            when rendering labels. Defaults to _preamble.
+        default_file_format (str, optional): Default file format used by
+            `savefig` when not explicitly given in filename.
+            Defaults to _default_file_format.
     """
+    global _file_format, _width_pt
     _file_format = default_file_format
     _width_pt = width_pt
 
@@ -172,3 +182,36 @@ def _use_lighter_grid():
             "grid.color": "e7e7e7",
         }
     )
+
+
+def utils_add_second_xaxis(ax):
+    """Adds a second x-axis on top frame of figure"""
+    ax2 = ax.twiny()
+    ax2.set_xticks(ax.get_xticks())
+    ax2.set_xbound(ax.get_xbound())
+    return ax2
+
+
+def utils_add_second_yaxis(ax):
+    """Adds a second y-axis on right frame of figure"""
+    ax2 = ax.twinx()
+    ax2.set_yticks(ax.get_yticks())
+    ax2.set_ybound(ax.get_ybound())
+    return ax2
+
+
+def utils_matplotlib_default_colors() -> list[str]:
+    """Defaults colors used by matplotlib"""
+    return plt.rcParams["axes.prop_cycle"].by_key()["color"]
+
+
+def utils_hide_frame(ax, sides=[0, 1, 2, 3]):
+    """Hides the framewires that around the figure.
+    E.g. [1, 3] hides upper-right axes
+    y |_
+       x
+    """
+    for i, spine in enumerate(ax.spines.values()):
+        if i not in sides:
+            continue
+        spine.set_visible(False)
