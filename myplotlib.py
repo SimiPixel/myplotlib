@@ -206,7 +206,7 @@ def utils_matplotlib_default_colors() -> list[str]:
 
 
 def utils_hide_frame(ax, sides=[0, 1, 2, 3]):
-    """Hides the framewires that around the figure.
+    """Hides the framewires around the figure.
     E.g. [1, 3] hides upper-right axes
     y |_
        x
