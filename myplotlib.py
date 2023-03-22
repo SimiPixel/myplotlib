@@ -14,6 +14,23 @@ _preamble = r"""
 \usepackage{mathtools}
 \usepackage{amsmath}
 \usepackage{amssymb}
+
+% Define some colors used in CDC
+\usepackage{xcolor}
+% salmon = #FA8072
+\definecolor{salmon}{RGB}{250, 128, 114}
+\definecolor{salmonDarker}{RGB}{184, 61, 48}
+% lightblue = #7BC8F6
+\definecolor{lightblue}{RGB}{123, 200, 246}
+\definecolor{lightblueDarker}{RGB}{39, 105, 143}
+% green = #008000
+\definecolor{green}{RGB}{0, 128, 0}
+% blue = #0343DF
+\definecolor{blue}{RGB}{3, 67, 223}
+
+% then use these colors with
+% \textcolor{salmon}{Loreum ips ...}
+
 """
 
 
@@ -174,14 +191,21 @@ def _use_thin_lines():
     )
 
 
+_light_grid_params = {
+    # corresponds to default b0b0b0 with grid.alpha=0.3,
+    # but looks better
+    "grid.color": "e7e7e7",
+}
+
+
 def _use_lighter_grid():
-    matplotlib.rcParams.update(
-        {
-            # corresponds to default b0b0b0 with grid.alpha=0.3,
-            # but looks better
-            "grid.color": "e7e7e7",
-        }
-    )
+    matplotlib.rcParams.update(_light_grid_params)
+
+
+def utils_adjust_ligher_grid(alpha: float):
+    global _light_grid_params
+    _light_grid_params = {"grid.color": "b0b0b0", "grid.alpha": alpha}
+    _use_lighter_grid()
 
 
 def utils_add_second_xaxis(ax):
