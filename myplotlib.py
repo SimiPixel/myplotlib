@@ -14,6 +14,7 @@ _preamble = r"""
 \usepackage{mathtools}
 \usepackage{amsmath}
 \usepackage{amssymb}
+\usepackage{siunitx}
 
 % Define some colors used in CDC
 \usepackage{xcolor}
