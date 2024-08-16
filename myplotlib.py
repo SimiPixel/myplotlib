@@ -7,13 +7,17 @@ _default_file_format = "pdf"
 _width_pt = _default_width_pt
 _file_format = _default_file_format
 
-_preamble = r"""
+
+_preamble1 = r"""
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
-\usepackage{lmodern}
+
 \usepackage{mathtools}
 \usepackage{amsmath}
 \usepackage{amssymb}
+"""
+
+_preamble2 = r"""
 \usepackage{siunitx}
 
 % Define some colors used in CDC
@@ -31,20 +35,31 @@ _preamble = r"""
 
 % then use these colors with
 % \textcolor{salmon}{Loreum ips ...}
-
 """
+
+
+def _make_preamble(font: str):
+    if font == "times":
+        # Use Times font for text and math
+        _preamble_font = r"\usepackage{txfonts}"
+    elif font == "lmodern":
+        _preamble_font = r"\usepackage{lmodern}"
+    elif font == "kp":
+        _preamble_font = r"\usepackage[largesmallcaps,intlimits,widermath]{kpfonts}"
+    else:
+        raise NotImplementedError
+
+    return _preamble1 + _preamble_font + _preamble2
 
 
 def setup(
     width_pt: float = _default_width_pt,
-    use_tex: bool = True,
-    font_family: str = "serif",
+    font: str = "lmodern",
     major_fontsize: int = 10,
     minor_fontsize: int = 8,
     light_grid: bool = True,
     thin_lines: bool = False,
-    use_latex_preamble: bool = True,
-    latex_preamble: str = _preamble,
+    latex_custom_cmds: str = r"",
     default_file_format: str = _default_file_format,
 ):
     """Setup matplotlib to be consistent with your .tex document.
@@ -52,10 +67,8 @@ def setup(
     Args:
         width_pt (float, optional): The page width in .tex document.
             Defaults to _default_width_pt.
-        use_tex (bool, optional): Whether or not to use latex to render text.
-            Defaults to True.
-        font_family (str, optional): The font used in your .tex document.
-            Defaults to "serif".
+        font (str, optional): The font used in your .tex document.
+            Defaults to "Computer Modern with Serifs".
         major_fontsize (int, optional): The font size used in your
             .tex document. Defaults to 10.
         minor_fontsize (int, optional): A slighlty smaller font size than the
@@ -63,11 +76,8 @@ def setup(
         light_grid (bool, optional): Prettier grid lines. Defaults to True.
         thin_lines (bool, optional): Thinner axes lines.
             Defaults to False.
-        use_latex_preamble (bool, optional): Whether or not to include a
-            latex preamble when rendering labels. Note that the preamble
-            will overwrite the `font_familty` parameter. Defaults to False.
-        latex_preamble (str, optional): The latex preamble to include
-            when rendering labels. Defaults to _preamble.
+        latex_custom_cmds (str, optional): The latex preamble to include
+            when rendering labels. Defaults to an empty string.
         default_file_format (str, optional): Default file format used by
             `savefig` when not explicitly given in filename.
             Defaults to _default_file_format.
@@ -76,11 +86,13 @@ def setup(
     _file_format = default_file_format
     _width_pt = width_pt
 
+    matplotlib.use("pgf")
+
     matplotlib.rcParams.update(
         {
             # Use LaTeX to write all text
-            "text.usetex": use_tex,
-            "font.family": font_family,
+            "text.usetex": True,
+            "font.family": "serif",
             # "font.serif": [],  # use default fonts
             # "font.sans-serif": [],  # use default fonts
             # "font.monospace": [],  # use default fonts
@@ -94,6 +106,9 @@ def setup(
             "ytick.labelsize": minor_fontsize,
             # Use system fonts when rendering SVGs.
             "svg.fonttype": "none",
+            "pgf.preamble": _make_preamble(font) + latex_custom_cmds,
+            "pgf.texsystem": "pdflatex",
+            "pgf.rcfonts": False,  # Do not override LaTeX font settings
         }
     )
 
@@ -102,12 +117,6 @@ def setup(
 
     if light_grid:
         _use_lighter_grid()
-
-    if not use_tex:
-        use_latex_preamble = False
-
-    if use_latex_preamble:
-        _use_pgf(latex_preamble)
 
 
 golden_ratio = 2.0 / (5**0.5 - 1)
@@ -159,7 +168,7 @@ def savefig(filename: str, transparent=True, dpi=300, tight=True):
         format = _file_format
     else:
         raise Exception(
-            f"The fileformat could not be uniquely inferred from the filename={filename}"
+            f"The fileformat could not be uniquely infered from the filename={filename}"
         )
 
     if format in ["jpg", "png"]:
@@ -169,16 +178,6 @@ def savefig(filename: str, transparent=True, dpi=300, tight=True):
 
     plt.savefig(
         filename + "." + format, format=format, transparent=transparent, **kwargs
-    )
-
-
-def _use_pgf(latex_preamble=_preamble):
-    matplotlib.use("pgf")
-    matplotlib.rcParams.update(
-        {
-            "pgf.preamble": latex_preamble,
-            "pgf.texsystem": "pdflatex",
-        }
     )
 
 
